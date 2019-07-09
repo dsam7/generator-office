@@ -13,6 +13,10 @@ import * as yo from 'yeoman-generator';
 import projectsJsonData from './config/projectsJsonData';
 import { helperMethods } from './helpers/helperMethods';
 import { modifyManifestFile } from 'office-addin-manifest';
+import { cli } from '../create-project/src/cli';
+import { runPublish } from '../create-project/src/cli';
+import { runSearch } from '../create-project/src/search';
+import { addProjectInfo } from '../create-project/src/sortJson';
 
 let insight = appInsights.getClient('1ced6a2f-b3b2-4da5-a1b8-746512fbc840');
 const childProcessExec = promisify(childProcess.exec);
@@ -101,17 +105,39 @@ module.exports = yo.extend({
       /* askForProjectType will only be triggered if no project type was specified via command line projectType argument,
        * and the projectType argument input was indeed valid */
       let startForProjectType = (new Date()).getTime();
+
+      let options = jsonData.getProjectTemplateNames().map(template => ({ name: jsonData.getProjectDisplayName(template), value: template }));
+      options.push({ name: 'Community Templates Catalog', value: 'catalog' });
+
       let askForProjectType = [
         {
           name: 'projectType',
           message: 'Choose a project type:',
           type: 'list',
           default: 'React',
-          choices: jsonData.getProjectTemplateNames().map(template => ({ name: jsonData.getProjectDisplayName(template), value: template })),
+          choices: options,
           when: this.options.projectType == null || !jsonData.isValidInput(this.options.projectType, false /* isHostParam */)
         }
       ];
       let answerForProjectType = await this.prompt(askForProjectType);
+
+      if (answerForProjectType.projectType === 'catalog') {
+        let action = await cli('create-project');
+        if (action.toLowerCase() === 'search') {
+          await runSearch();
+        } else {
+          let answers = await runPublish();
+
+          console.log('Here is your project info:');
+          console.log(answers);
+
+          // Write to templates.json
+          addProjectInfo(answers.template, answers.version, answers.author, answers.npm, answers.git, answers.tag);
+        }
+        console.log('Thank you for using the Community Templates Catalog!');
+        process.exit(-1);
+      }
+
       let endForProjectType = (new Date()).getTime();
       let durationForProjectType = (endForProjectType - startForProjectType) / 1000;
 
@@ -232,7 +258,7 @@ module.exports = yo.extend({
       /* Set folder if to output param  if specified */
       if (this.options.output != null) {
         this.project.folder = this.options.output; }
-      
+
       /* Set language variable */
       language = this.project.scriptType === typescript ? 'ts' : 'js';
 
