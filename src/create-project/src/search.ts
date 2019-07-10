@@ -38,13 +38,15 @@ export async function runSearch() {
     console.log('Here are your search results:');
     console.table(results);
 
-    let further: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Would you like to further search through these results?', choices: ['Yes', 'No'] });
+    if (results.length > 1) {
+        let further: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Would you like to further search through these results?', choices: ['Yes', 'No'] });
 
-    if (further.response === 'Yes') {
-        answers = await inquirer.prompt(questions);
-        results = await search(results, answers.input.toLowerCase(), answers.param.toLowerCase());
-        console.log('Here are your search results:');
-        console.table(results);
+        if (further.response === 'Yes') {
+            answers = await inquirer.prompt(questions);
+            results = await search(results, answers.input.toLowerCase(), answers.param.toLowerCase());
+            console.log('Here are your search results:');
+            console.table(results);
+        }
     }
 }
 
