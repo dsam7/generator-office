@@ -20,9 +20,14 @@ export function compareStrings(a, b) {
  * @param tag
  */
 export function addProjectInfo(name, version, author, npm, repository, tag) {
-    let json: any = fs.readFileSync(file, (err, data) => {
-        if (err) { throw err; }
-    });
+    let json: any;
+    try {
+        json = fs.readFileSync(file);
+    } catch (err) {
+        console.log('ERROR: File Not Found!');
+        console.log('There is no templates.json file in this directory to add your project to');
+        process.exit(-1);
+    }
     json = JSON.parse(json);
     let project = {
         'name': name,

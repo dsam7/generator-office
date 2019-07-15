@@ -1,13 +1,16 @@
 import inquirer = require('inquirer');
 import * as fs from 'fs';
-const file = './templates.json';
+import request = require('request');
+//const file = './templates.json';
+const file = 'https://raw.githubusercontent.com/OfficeDev/templates-catalog/master/templates.json?token=ADD4CNYSDYJIRO6RPDF766K5FZDK2';
+const exec = require('child_process').execSync;
 
 /**
  * Prompt the user with questions to run a search through the Catalog
  * Calls search, prints results, and runs the search up to two times.
  */
 export async function runSearch() {
-    let json: any;
+    /*let json: any;
     try {
         json = fs.readFileSync(file);
     } catch (err) {
@@ -15,8 +18,14 @@ export async function runSearch() {
         console.log('There is no templates.json file in this directory to search through');
         process.exit(-1);
     }
-    json = JSON.parse(json);
+    json = JSON.parse(json);*/
 
+    let json: any;
+    await request.get(file, (err, response, body) => {
+        if (!err && response.statusCode === 200) {
+            json = JSON.parse(body);
+        }
+    });
     let questions: any =
         [
             {
@@ -46,6 +55,34 @@ export async function runSearch() {
             results = await search(results, answers.input.toLowerCase(), answers.param.toLowerCase());
             console.log('Here are your search results:');
             console.table(results);
+        }
+    }
+
+    if (results.length > 0) {
+        let install: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Would you like to install/clone one of these projects?', choices: ['Yes', 'No'] });
+        if (install.response === 'Yes') {
+            let projects = [];
+            for (let i = 0; i < results.length; i++) {
+                projects.push(i + ': ' + results[i].name);
+            }
+            let choice: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Please choose a project', choices: projects });
+            let installType: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Choose which service to retrieve the project from', choices: ['NPM', 'GitHub'] });
+            let installCommand: string = '';
+            let projectLink: string = '';
+
+            if (installType.response === 'NPM') {
+                installCommand = 'npm i ';
+                projectLink = results[+choice.response.charAt(0)].npm;
+            } else {
+                installCommand = 'git clone https://';
+                projectLink = results[+choice.response.charAt(0)].repository + '.git';
+            }
+
+            try {
+                exec(installCommand + projectLink);
+            } catch (err) {
+                console.log('Error with Installation!');
+            }
         }
     }
 }
