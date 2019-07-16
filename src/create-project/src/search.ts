@@ -1,8 +1,7 @@
 import inquirer = require('inquirer');
-import * as fs from 'fs';
 import request = require('request');
 //const file = './templates.json';
-const file = 'https://raw.githubusercontent.com/OfficeDev/templates-catalog/master/templates.json?token=ADD4CNYSDYJIRO6RPDF766K5FZDK2';
+const file = 'https://raw.githubusercontent.com/OfficeDev/templates-catalog/master/templates.json?token=ADD4CN76YLBHAH2AOTVHTVC5G6L3C';
 const exec = require('child_process').execSync;
 
 let json: any;

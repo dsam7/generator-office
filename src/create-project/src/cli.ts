@@ -92,10 +92,9 @@ export async function cli(args) {
     let action: any = await inquirer.prompt(question);
     argument = action.action;
   }
-  return argument;
 
-  /*if (argument.toLowerCase() === 'search') {
-    runSearch();
+  if (argument.toLowerCase() === 'search') {
+    await runSearch();
   } else {
     // Prompt the user with questions about their project
     let answers = await runPublish();
@@ -104,6 +103,6 @@ export async function cli(args) {
     console.log(answers);
 
     // Write to templates.json
-    addProjectInfo(answers.template, answers.version, answers.author, answers.npm, answers.git, answers.tag);
-  }*/
+    await addProjectInfo(answers.template, answers.version, answers.author, answers.npm, answers.git, answers.tag);
+  }
 }

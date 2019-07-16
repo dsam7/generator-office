@@ -14,9 +14,6 @@ import projectsJsonData from './config/projectsJsonData';
 import { helperMethods } from './helpers/helperMethods';
 import { modifyManifestFile } from 'office-addin-manifest';
 import { cli } from '../create-project/src/cli';
-import { runPublish } from '../create-project/src/cli';
-import { runSearch } from '../create-project/src/search';
-import { addProjectInfo } from '../create-project/src/sortJson';
 
 let insight = appInsights.getClient('1ced6a2f-b3b2-4da5-a1b8-746512fbc840');
 const childProcessExec = promisify(childProcess.exec);
@@ -122,18 +119,7 @@ module.exports = yo.extend({
       let answerForProjectType = await this.prompt(askForProjectType);
 
       if (answerForProjectType.projectType === 'catalog') {
-        let action = await cli('create-project');
-        if (action.toLowerCase() === 'search') {
-          await runSearch();
-        } else {
-          let answers = await runPublish();
-
-          console.log('Here is your project info:');
-          console.log(answers);
-
-          // Write to templates.json
-          addProjectInfo(answers.template, answers.version, answers.author, answers.npm, answers.git, answers.tag);
-        }
+        await cli('create-project');
         console.log('Thank you for using the Community Templates Catalog!');
         process.exit(-1);
       }
