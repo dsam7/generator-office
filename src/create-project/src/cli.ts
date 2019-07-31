@@ -55,7 +55,7 @@ export async function runPublish(): Promise<any> {
   questions.push({
     name: 'web',
     message: 'Do you have a url with a a project logo or image?'
-  })
+  });
 
   const answers: any = await inquirer.prompt(questions);
 
@@ -79,7 +79,7 @@ export async function runPublish(): Promise<any> {
  * @return action to take (search/publish) to index.ts to then run the necessary next step
  */
 export async function cli(args) {
-  let argument = '';
+  /*let argument = '';
 
   // Check if an optional command line argument is present
   if (args[2]) {
@@ -110,5 +110,8 @@ export async function cli(args) {
 
     // Write to templates.json
     await addProjectInfo(answers.template, answers.version, answers.author, answers.npm, answers.git, answers.tag, answers.web);
-  }
+  }*/
+
+  //only allow search through generator-office
+  await runSearch();
 }

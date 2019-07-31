@@ -119,7 +119,7 @@ module.exports = yo.extend({
       let answerForProjectType = await this.prompt(askForProjectType);
 
       if (answerForProjectType.projectType === 'catalog') {
-        await cli('create-project');
+        await cli('search');
         console.log('Thank you for using the Community Templates Catalog!');
         process.exit(-1);
       }

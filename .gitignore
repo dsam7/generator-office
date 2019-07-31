@@ -64,3 +64,4 @@ packages/**
 typings/**
 generators/**
 .vscode/**
+node_modules
