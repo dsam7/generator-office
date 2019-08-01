@@ -20,9 +20,17 @@ export async function runSearch() {
     });
 
     json = await searchWithPrompts();
+    json = json.map(j => ({'name': j.name, 'version': j.version, 'author': j.author, 'npm': j.npm, 'repository': j.repository, 'tag': j.tag}));
 
     console.log('Here are your search results:');
-    console.table(json, ['name', 'version', 'author', 'npm', 'repository', 'tag']);
+
+    //hack to allow console.table to display results on Node 8
+    if (process.version[1] === '8') {
+        delete console.table;
+        require('console.table');
+        console.log('We recommend using Node version 10+ for the best view of the catalog');
+    }
+    console.table(json);
 
     if (json.length > 0) {
         if (json.length > 1) {
@@ -47,7 +55,7 @@ export async function searchWithPrompts() {
             {
                 type: 'list',
                 name: 'param',
-                message: 'What paramter would you like to search by?',
+                message: 'What parameter would you like to search by?',
                 choices: ['Name', 'Author', 'NPM', 'Repository', 'Tag']
             },
             {
@@ -84,7 +92,11 @@ export function search(json, input, param) {
     }
     return temp;
 }
-
+/**
+ * Returns the projects associated with what a user has searched for
+ * with each project numbered
+ * @param results projects currently filtered by search
+ */
 export function getInstallableProjects(results: any) {
     let projects = [];
     for (let i = 0; i < results.length; i++) {
@@ -92,7 +104,12 @@ export function getInstallableProjects(results: any) {
     }
     return projects;
 }
-
+/**
+ * Allows the user to choose a project to install and a
+ * service to install from.
+ * @param results
+ * @param projects
+ */
 export async function installProject(results: any, projects: any) {
     let choice: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Please choose a project', choices: projects });
     let installType: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Choose which service to retrieve the project from', choices: ['NPM', 'GitHub'] });
@@ -113,6 +130,8 @@ export async function installProject(results: any, projects: any) {
         //get newly npm installed files from global location and move to user profile
         //allows user to get the src files instead of just the node_modules like in a normal npm install
         if (installType.response === 'NPM') {
+            //TODO - node 8 has a different source folder, need to accomodate that
+            //currently npm installation wont work on node version 8
             let sourceFolder = process.env.APPDATA + '/npm/node_modules/' + results[index].npm;
             let destFolder = process.env.USERPROFILE + '/' + results[index].npm;
             try {
