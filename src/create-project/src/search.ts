@@ -38,7 +38,7 @@ export async function runSearch() {
             if (further.response === 'Yes') {
                 json = await searchWithPrompts();
                 console.log('Here are your search results:');
-                console.table(json, ['name', 'version', 'author', 'npm', 'repository', 'tag']);
+                console.table(json);
             }
         }
         let install: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Would you like to install/clone one of these projects?', choices: ['Yes', 'No'] });
@@ -107,8 +107,8 @@ export function getInstallableProjects(results: any) {
 /**
  * Allows the user to choose a project to install and a
  * service to install from.
- * @param results
- * @param projects
+ * @param results 
+ * @param projects 
  */
 export async function installProject(results: any, projects: any) {
     let choice: any = await inquirer.prompt({ type: 'list', name: 'response', 'message': 'Please choose a project', choices: projects });
@@ -126,6 +126,7 @@ export async function installProject(results: any, projects: any) {
     }
 
     try {
+        console.log('Your project is being installed now...');
         await exec(installCommand + projectLink);
         //get newly npm installed files from global location and move to user profile
         //allows user to get the src files instead of just the node_modules like in a normal npm install
